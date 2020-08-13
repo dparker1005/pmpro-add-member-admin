@@ -134,6 +134,15 @@ function pmproama_add_action_links( $links ) {
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'pmproama_add_action_links' );
 
 /**
+ * Enqueue admin JavaScript and CSS
+ */
+function pmproama_admin_enqueue_scripts() {
+    wp_register_script( 'pmproama_admin', plugins_url( 'js/pmproama-admin.js', __FILE__ ), array( 'jquery' ) );
+    wp_enqueue_script( 'pmproama_admin' );
+}
+add_action( 'admin_enqueue_scripts', 'pmproama_admin_enqueue_scripts' );
+
+/**
  * Function to add links to the plugin row meta
  *
  * @param array  $links Array of links to be shown in plugin meta.
@@ -157,7 +166,9 @@ function pmproama_action_links( $actions, $user ) {
 	$cap = apply_filters( 'pmpro_add_member_cap', 'edit_users' );
 
 	if ( current_user_can( $cap ) && ! empty( $user->ID ) ) {
-		$actions['addorder'] = '<a href="' . admin_url( 'admin.php?page=pmpro-addmember&user=' . $user->ID ) . '">' . __( '+order', 'pmpro-add-member-admin' ) . '</a>';
+		$order = new MemberOrder();
+		$order_id = $order->getLastMemberOrder( $user->ID );
+		$actions['addorder'] = '<a href="' . admin_url( 'admin.php?page=pmpro-orders&order=-1&pmproama=' . $user->ID . ( empty( $order_id ) ? '' : ('&copy=' . $order_id) ) ) . '">' . __( '+order', 'pmpro-add-member-admin' ) . '</a>';
 	}
 
 	return $actions;
